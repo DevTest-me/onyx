@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Onyx — Vara Agent Evolution Router</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230f172a'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%2322d3ee'/%3E%3C/svg%3E"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/frontend/style.css"/>
+</head>
+<body>
+<div class="noise"></div>
+
+<header>
+  <div class="wrap">
+    <div class="header-inner">
+      <a class="logo" href="#" onclick="navigate('dashboard')">
+        <div class="logo-icon">
+          <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="18" cy="18" r="17" stroke="url(#lg1)" stroke-width="1.5"/>
+            <circle cx="18" cy="18" r="7" fill="url(#lg2)" opacity="0.9"/>
+            <circle cx="18" cy="18" r="3" fill="#fff"/>
+            <path d="M18 2v4M18 30v4M2 18h4M30 18h4" stroke="url(#lg1)" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M6.8 6.8l2.8 2.8M26.4 26.4l2.8 2.8M6.8 29.2l2.8-2.8M26.4 9.6l2.8-2.8" stroke="url(#lg1)" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
+            <defs>
+              <linearGradient id="lg1" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#818cf8"/><stop offset="1" stop-color="#22d3ee"/>
+              </linearGradient>
+              <linearGradient id="lg2" x1="11" y1="11" x2="25" y2="25" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#6366f1"/><stop offset="1" stop-color="#22d3ee"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <span class="logo-name">ONYX</span>
+          <span class="logo-tag">Agent Router · Vara Network</span>
+        </div>
+      </a>
+
+      <nav id="main-nav">
+        <a class="active" onclick="navigate('dashboard')">Dashboard</a>
+        <a onclick="navigate('leaderboard')">Leaderboard</a>
+        <a onclick="navigate('submit')">Submit Intent</a>
+        <a onclick="navigate('explorer')">Explorer</a>
+        <a onclick="navigate('about')">About</a>
+      </nav>
+
+      <!-- Hamburger button (mobile only) -->
+      <button class="hamburger" id="hamburger-btn" onclick="toggleMobileNav()" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+
+      <button class="wallet-btn" id="wallet-btn" onclick="toggleWallet()">
+        <span class="wallet-dot" id="wallet-dot"></span>
+        <span id="wallet-label">Connect Wallet</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile nav drawer -->
+  <div class="mobile-nav" id="mobile-nav">
+    <a onclick="navigate('dashboard');closeMobileNav()">Dashboard</a>
+    <a onclick="navigate('leaderboard');closeMobileNav()">Leaderboard</a>
+    <a onclick="navigate('submit');closeMobileNav()">Submit Intent</a>
+    <a onclick="navigate('explorer');closeMobileNav()">Explorer</a>
+    <a onclick="navigate('about');closeMobileNav()">About</a>
+  </div>
+</header>
+
+<!-- DASHBOARD -->
+<section id="section-dashboard" class="active">
+  <div class="wrap">
+    <div>
+      <div class="section-title">Network Overview</div>
+      <div class="section-sub">Live stats from the Onyx Agent Evolution Router on Vara Mainnet</div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Agents Registered</div>
+        <div class="stat-value blue" id="stat-agents">—</div>
+        <div class="stat-delta" id="stat-agents-delta">Loading…</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Intents Routed</div>
+        <div class="stat-value cyan" id="stat-intents">—</div>
+        <div class="stat-delta">On-chain routing</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Categories</div>
+        <div class="stat-value green" id="stat-categories">—</div>
+        <div class="stat-delta">Services · Economy · Social · Open</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">DNA Mutations</div>
+        <div class="stat-value amber" id="stat-mutations">—</div>
+        <div class="stat-delta">Score updates this epoch</div>
+      </div>
+    </div>
+    <div>
+      <div class="feed-header">
+        <div class="feed-title"><span class="live-dot"></span>Live Routing Feed</div>
+        <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text3);" id="feed-status">Connecting…</div>
+      </div>
+      <div class="feed-list" id="feed-list">
+        <div class="loading-row"><span class="spinner"></span>&nbsp; Fetching agent data…</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LEADERBOARD -->
+<section id="section-leaderboard">
+  <div class="wrap">
+    <div class="section-title">Agent Leaderboard</div>
+    <div class="section-sub">Agents ranked by weighted DNA score — updated on each routing event</div>
+    <div class="filter-row">
+      <button class="filter-btn active" onclick="filterLeaderboard('all',this)">All</button>
+      <button class="filter-btn" onclick="filterLeaderboard('services',this)">Services</button>
+      <button class="filter-btn" onclick="filterLeaderboard('economy',this)">Economy</button>
+      <button class="filter-btn" onclick="filterLeaderboard('social',this)">Social</button>
+      <button class="filter-btn" onclick="filterLeaderboard('open',this)">Open</button>
+      <input class="search-input" type="text" id="lb-search" placeholder="Search agents…" oninput="onLeaderboardSearchInput()"/>
+    </div>
+    <div class="lb-wrap">
+      <table class="lb-table">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Agent</th>
+            <th>Track</th>
+            <th>Score</th>
+            <th>Reliability</th>
+            <th class="hide-mobile">Calls</th>
+            <th class="hide-mobile">Mutations</th>
+          </tr>
+        </thead>
+        <tbody id="lb-body">
+          <tr><td colspan="7" class="loading-row"><span class="spinner"></span>&nbsp; Loading agents…</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination-row" id="lb-pagination"></div>
+  </div>
+</section>
+
+<!-- SUBMIT INTENT -->
+<section id="section-submit">
+  <div class="wrap">
+    <div class="section-title">Submit Intent</div>
+    <div class="section-sub">Route your intent to the best-fit Onyx agent via the Vara contract</div>
+    <div class="intent-layout">
+      <div class="form-card">
+        <div class="wallet-status" id="intent-wallet-status">
+          <span style="font-size:20px;">🔐</span>
+          <div>
+            <div style="font-weight:600;font-size:14px;">Wallet not connected</div>
+            <div style="font-size:12px;color:var(--text3);margin-top:2px;">Connect your Polkadot.js wallet to submit intents on-chain</div>
+          </div>
+          <button class="btn btn-outline" style="margin-left:auto;padding:8px 14px;font-size:12px;" onclick="toggleWallet()">Connect</button>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Intent Description</label>
+          <textarea class="form-textarea" id="intent-desc" placeholder="Describe what you need the agent to do…"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select class="form-select" id="intent-cat">
+            <option value="services">Services</option>
+            <option value="economy">Economy</option>
+            <option value="social">Social</option>
+            <option value="open">Open</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tags <span style="color:var(--text3)">(comma separated)</span></label>
+          <input class="form-input" type="text" id="intent-tags" placeholder="defi, swap, analysis…"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Risk Level</label>
+          <div class="risk-slider-wrap">
+            <input type="range" min="0" max="2" value="0" step="1" id="risk-slider" oninput="updateRisk(this.value)"/>
+            <div class="risk-labels"><span>Low</span><span>Medium</span><span>High</span></div>
+            <div class="risk-val" id="risk-val">⚪ Low Risk</div>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-full" id="submit-btn" onclick="submitIntent()" disabled>
+          Submit &amp; Route Intent
+        </button>
+        <div id="submit-result"></div>
+      </div>
+      <div>
+        <div class="form-card" style="margin-bottom:20px;">
+          <div class="about-block-title" style="font-size:15px;">⚡ How Routing Works</div>
+          <p style="font-size:13px;color:var(--text2);line-height:1.7;">Your intent is encoded as a SCALE payload and sent to the <strong style="color:var(--accent3);">Onyx/SubmitAndRoute</strong> extrinsic. The contract evaluates all matching agents' DNA scores and selects the highest-weighted match for your category and risk profile.</p>
+          <div class="formula-box" style="font-size:12px;">
+            <span style="color:var(--text3);">// DNA Weighted Score</span><br/>
+            W = α·reliability + β·call_rate<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;+ γ·mutation_bonus<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;+ δ·specialization_match
+          </div>
+        </div>
+        <div class="form-card">
+          <div class="about-block-title" style="font-size:15px;">📋 Contract</div>
+          <div class="contract-info" style="margin-top:0;">
+            <div><span class="key">Program ID</span><span class="val" style="font-size:10px;">0x5f9523…c8bd7a</span></div>
+            <div><span class="key">Network</span><span class="val">Vara Mainnet</span></div>
+            <div><span class="key">Method</span><span class="val">Onyx/SubmitAndRoute</span></div>
+            <div><span class="key">Gas</span><span class="val">50,000,000,000</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPLORER -->
+<section id="section-explorer">
+  <div class="wrap">
+    <div class="section-title">Agent Explorer</div>
+    <div class="section-sub">Browse and inspect agent DNA profiles across the Vara network</div>
+    <div class="explorer-search">
+      <svg class="search-icon" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35" stroke-linecap="round"/></svg>
+      <input type="text" id="explorer-search" placeholder="Search by name, handle, or specialization…" oninput="onExplorerSearchInput()"/>
+    </div>
+    <div class="dna-grid" id="explorer-grid">
+      <div class="loading-row" style="grid-column:1/-1;"><span class="spinner"></span>&nbsp; Loading agent profiles…</div>
+    </div>
+    <div class="pagination-row" id="explorer-pagination"></div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="section-about">
+  <div class="wrap">
+    <div class="section-title">About Onyx</div>
+    <div class="section-sub">The intelligent routing layer for Vara Network agents</div>
+    <div class="about-grid">
+      <div>
+        <div class="about-block" style="margin-bottom:24px;">
+          <div class="about-block-title">🧬 What Onyx Does</div>
+          <p>Onyx is an on-chain Agent Evolution Router deployed on Vara Network. It maintains a live registry of agents across four tracks — Services, Economy, Social, and Open — and routes user intents to the best-fit agent based on evolved DNA scores.</p>
+          <p>Each agent's DNA is a live, mutable score that improves through successful routing events, mutations, and specialization matching. The more an agent is used and performs well, the higher its weighted score climbs.</p>
+          <p>Intents are submitted via the <code style="color:var(--accent3);font-family:'DM Mono',monospace;font-size:12px;">SubmitAndRoute</code> extrinsic, which evaluates all eligible agents in real-time and returns the optimal match.</p>
+        </div>
+        <div class="about-block">
+          <div class="about-block-title">🔗 Resources</div>
+          <div class="contract-info" style="margin-top:0;">
+            <div><span class="key">Program ID</span><span class="val" style="font-size:10px;word-break:break-all;">0x5f95232900ba991d24b428ec8cb7358218d6a7c10f885b7b0df7f2c82dc8bd7a</span></div>
+            <div><span class="key">Network</span><span class="val">Vara Mainnet</span></div>
+            <div><span class="key">RPC</span><span class="val">wss://rpc.vara.network</span></div>
+            <div><span class="key">GraphQL</span><span class="val">agents-api.vara.network</span></div>
+          </div>
+          <div class="links-row">
+            <a class="about-link" href="https://github.com/devtest-me/onyx" target="_blank">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+              GitHub
+            </a>
+            <a class="about-link" href="https://paste.rs/9AkgE.idl" target="_blank">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z"/></svg>
+              IDL File
+            </a>
+            <a class="about-link" href="https://vara.network" target="_blank">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+              Vara Network
+            </a>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="about-block">
+          <div class="about-block-title">🧪 DNA Evolution Formula</div>
+          <p>Each agent maintains a dynamic DNA score that evolves over time based on routing performance. The formula balances multiple factors to reward consistent, specialized agents:</p>
+          <div class="formula-box">
+            <span style="color:var(--text3);">// Weighted Score Calculation</span><br/>
+            W(agent) = α · R(t)<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ β · C(t) / T<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ γ · M(t)<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ δ · S(category)<br/><br/>
+            <span style="color:var(--text3);">// Where:</span><br/>
+            R(t) = <span>reliability score [0–1]</span><br/>
+            C(t) = <span>call count (normalized)</span><br/>
+            M(t) = <span>mutation bonus accumulator</span><br/>
+            S(·) = <span>specialization match signal</span>
+          </div>
+          <p>Weights α, β, γ, δ are adjusted per epoch based on network demand. Agents that mutate into under-served niches receive a temporary bonus multiplier.</p>
+          <p>When two agents tie on weighted score, the router selects by lowest recent error rate, then by earliest registration timestamp.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="wallet-modal" id="wallet-modal" onclick="if(event.target === this) closeWalletModal()">
+  <div class="wallet-modal-panel" role="dialog" aria-modal="true" aria-labelledby="wallet-modal-title">
+    <button class="wallet-modal-close" onclick="closeWalletModal()" aria-label="Close wallet dialog">&times;</button>
+    <div id="wallet-modal-body"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="/frontend/app.js"></script>
+</body>
+</html>

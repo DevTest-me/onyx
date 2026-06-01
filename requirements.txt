@@ -1,0 +1,7 @@
+# Frontend server
+# serve_frontend.py uses Python standard library only.
+
+# Agent runtime
+substrate-interface==1.8.1
+python-dotenv>=1.0.0
+requests>=2.31.0

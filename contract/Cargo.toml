@@ -1,0 +1,40 @@
+[package]
+name = "onyx"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.91"
+
+[dependencies]
+onyx-app = { version = "0.1.0", path = "app" }
+sails-rs = "0.10.3"
+
+[dev-dependencies]
+onyx-app = { version = "0.1.0", path = "app" }
+sails-rs = { version = "0.10.3", features = ["gtest"] }
+tokio = { version = "1.48.0", features = ["rt", "macros"] }
+
+[build-dependencies]
+onyx-app = { version = "0.1.0", path = "app" }
+sails-rs = { version = "0.10.3", features = ["build"] }
+
+[workspace]
+resolver = "3"
+members = ["app"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.91"
+
+[workspace.dependencies]
+sails-rs = "0.10.3"
+onyx-app = { version = "0.1.0", path = "app" }
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+
+[profile.dev]
+panic = "abort"

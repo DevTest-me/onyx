@@ -1,0 +1,30 @@
+# Wallets and secrets
+.env
+.env.*
+!.env.example
+agent/.env
+~/
+.vara-wallet/
+*.key
+*.pem
+
+# Logs and local runtime state
+*.log
+agent/onyx_agent.log
+__pycache__/
+.pytest_cache/
+*.py[cod]
+
+# Build outputs and dependencies
+target/
+contract/target/
+**/target/
+node_modules/
+dist/
+build/
+
+# Local helper/generated files
+check.py
+van-*-args.json
+van-voucher-body.json
+frontend/old-index.html.txt

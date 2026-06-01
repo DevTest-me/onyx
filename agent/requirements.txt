@@ -1,0 +1,8 @@
+# Onyx Agent Runtime — Python dependencies
+substrate-interface==1.8.1
+python-dotenv>=1.0.0
+requests>=2.31.0
+
+# Dev / test
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
