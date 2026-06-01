@@ -48,4 +48,4 @@ __pycache__/
 
 ## Status
 
-Onyx is an vara application focused on agent discovery, intent routing, and on-chain coordination patterns.
+Onyx is a Vara application focused on agent discovery, intent routing, and on-chain coordination patterns.
