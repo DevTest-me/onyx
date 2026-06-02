@@ -13,7 +13,7 @@
 ───────────────────────────────────────────── */
 const PROGRAM_ID =
   '0x5f95232900ba991d24b428ec8cb7358218d6a7c10f885b7b0df7f2c82dc8bd7a';
-const VARA_RPC    = 'wss://rpc.vara.network';
+const VARA_RPC_ENDPOINTS = ['wss://rpc.vara.network'];
 const GRAPHQL_URL = '/api/graphql';
 const APP_NAME    = 'Onyx';
 const GAS_LIMIT   = 50_000_000_000n;
@@ -105,6 +105,7 @@ const AGENT_CACHE_TTL_MS = 5 * 60 * 1000;
 const WALLET_TIMEOUT_MS = 10_000;
 const VARA_DECIMALS = 12n;
 const MIN_SUBMIT_BALANCE = 1_000_000_000_000n; // 1 VARA safety floor for fees + gas reservation
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 /* ─────────────────────────────────────────────
    BOOT
@@ -197,13 +198,40 @@ function renderRegistryFeed() {
 /* ─────────────────────────────────────────────
    GEAR API
 ───────────────────────────────────────────── */
-async function initGearApi() {
+async function initGearApi(providerAddress) {
   if (gearApi && isGearConnected()) return;
   const GJ = await import('https://esm.sh/@gear-js/api@0.45.0');
   if (!GJ?.GearApi) throw new Error('@gear-js/api not loaded');
-  gearApi = await GJ.GearApi.create({ providerAddress: VARA_RPC });
+  gearApi = await GJ.GearApi.create({ providerAddress });
   gearApi.provider?.on?.('disconnected', () => setFeedStatus('Vara RPC disconnected'));
   gearApi.provider?.on?.('connected', () => setFeedStatus('Live - Vara Mainnet'));
+}
+
+async function initGearApiWithRetry() {
+  let lastError = null;
+
+  for (const endpoint of VARA_RPC_ENDPOINTS) {
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      try {
+        setFeedStatus(`Connecting to Vara RPC (${attempt}/3)...`);
+        await withTimeout(
+          initGearApi(endpoint),
+          `Vara RPC connection timed out at ${endpoint}`,
+          30_000,
+        );
+        return;
+      } catch (err) {
+        lastError = err;
+        console.warn(`[rpc] ${endpoint} attempt ${attempt} failed`, err);
+        try { await gearApi?.disconnect?.(); } catch { /* best effort */ }
+        try { await gearApi?.provider?.disconnect?.(); } catch { /* best effort */ }
+        gearApi = null;
+        if (attempt < 3) await sleep(1_500 * attempt);
+      }
+    }
+  }
+
+  throw new Error(`Vara RPC is temporarily unavailable. ${lastError?.message || 'Try again shortly.'}`);
 }
 
 /* ─────────────────────────────────────────────
@@ -264,7 +292,7 @@ async function resetChainConnection() {
   gearApi = null;
   sailsInst = null;
   setFeedStatus('Connecting to Vara RPC...');
-  await withTimeout(initGearApi(), 'Vara RPC connection timed out. Refresh and try again.', 20_000);
+  await initGearApiWithRetry();
   await initSails();
 }
 
