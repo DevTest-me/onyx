@@ -13,6 +13,19 @@ class OnyxHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(ROOT), **kwargs)
 
+    def do_GET(self):
+        if self.path in {"/health", "/healthz", "/ping"}:
+            payload = b'{"ok":true,"service":"onyx"}'
+            self.send_response(200)
+            self.send_header("content-type", "application/json")
+            self.send_header("cache-control", "no-store")
+            self.send_header("content-length", str(len(payload)))
+            self.end_headers()
+            self.wfile.write(payload)
+            return
+
+        super().do_GET()
+
     def do_POST(self):
         if self.path != "/api/graphql":
             self.send_error(404, "Not found")
@@ -53,6 +66,7 @@ def main():
     server = ThreadingHTTPServer((host, port), OnyxHandler)
     print(f"Serving Onyx on http://{host}:{port}/frontend/index.html")
     print("GraphQL proxy enabled at /api/graphql")
+    print("Health check enabled at /health")
     server.serve_forever()
 
 
