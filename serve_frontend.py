@@ -24,6 +24,16 @@ class OnyxHandler(SimpleHTTPRequestHandler):
             self.wfile.write(payload)
             return
 
+        if self.path in {"/frontend", "/frontend/", "/frontend/index.html"}:
+            self.send_response(302)
+            self.send_header("location", "/")
+            self.send_header("cache-control", "no-store")
+            self.end_headers()
+            return
+
+        if self.path == "/":
+            self.path = "/index.html"
+
         super().do_GET()
 
     def do_POST(self):
@@ -64,7 +74,7 @@ def main():
     port = int(sys.argv[1]) if len(sys.argv) > 1 else int(os.getenv("PORT", "8000"))
     host = os.getenv("HOST", "0.0.0.0")
     server = ThreadingHTTPServer((host, port), OnyxHandler)
-    print(f"Serving Onyx on http://{host}:{port}/frontend/index.html")
+    print(f"Serving Onyx on http://{host}:{port}/")
     print("GraphQL proxy enabled at /api/graphql")
     print("Health check enabled at /health")
     server.serve_forever()
